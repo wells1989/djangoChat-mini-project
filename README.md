@@ -9,7 +9,7 @@
 
 This Chatroom mini app is a Django-based web application, focusing on using Web Sockets to allow asynchronous requests alongside the synchronous HTTP requests used in prior projects.
 
-The App focused on asynchronous Django using Web Socket , and so the UI usage was kept simple.
+The App focused on asynchronous Django using Web Socket , and so the UI was kept visually simple.
 
 **Tech Stack: Python / Aysnchronous requests with Django Channels /  ORM with Django, JS DOM manipulation / tailwindcss**
 
