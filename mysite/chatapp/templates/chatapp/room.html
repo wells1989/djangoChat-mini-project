@@ -1,0 +1,97 @@
+{% extends 'chatapp/base.html' %}
+
+{% block body %}
+<div class="m-10 font-bold w-100 text-center text-2xl">
+    {{ chatroom.name }}
+</div>
+
+<div class="message-container m-5 mb-16 overflow-auto h-[700px]" id="message-container">
+    <div id="chat-messages">
+        {% for message in messages %}
+        <div class="message shadow-lg p-5 m-3 mr-10 ml-10 w-100 flex justify-center items-center bg-blue-100">
+            <div class="p-3 italic">{{ message.user.username }}</div>
+            <div class="p-3 font-bold">{{ message.message_content }}</div>
+            <div class="p-3">{{ message.date }}</div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="form-container fixed inset-x-0 bottom-0 bg-blue-300 p-5 text-center">
+    <form action="" method="POST">
+        {% csrf_token %}
+        <input id="message-input" type="text" class="rounded-md px-2 mr-3" name="message" placeholder="enter message">
+
+        <button class="ml-5 px-4 hover:bg-blue-400 hover:font-bold rounded-lg" id="send-button"
+            type="submit">Send</button>
+    </form>
+</div>
+
+{{ chatroom.slug|json_script:"json-chatroomname" }}
+{{ request.user.username|json_script:"json-username" }}
+
+<script>
+    const chatRoomName = JSON.parse(document.getElementById('json-chatroomname').textContent);
+    const username = JSON.parse(document.getElementById("json-username").textContent);
+
+    const chatSocket = new WebSocket(
+        'ws://'
+        + window.location.host // e.g. localhost:8000
+        + '/ws/'
+        + chatRoomName
+        + '/'
+    )
+    // above, creating a new WebSocket using the above path e.g. ws://localhost:8000/ws/chatRoomName (as in routing.py is looking for path("ws/<str:room_name>" ...)
+
+    chatSocket.onmessage = function (e) {
+        const data = JSON.parse(e.data) // parsing the send data
+
+        if (data.message) {
+            const currentDate = new Date();
+            const formattedTime = currentDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+
+            let html = '<div class="message shadow-lg p-5 m-3 mr-10 ml-10 w-100 flex justify-center items-center bg-blue-100">' +
+                '<div class="p-3 italic">' + data.username + '</div>' + '<div class="p-3 font-bold">' + data.message + '</div>' + '<div class="p-3">' + formattedTime + '</div>' + '</div>'
+            document.getElementById("chat-messages").innerHTML += html
+            setTimeout(scroll, 50); // setTimeout used to give DOM time to update before implementing scroll function
+        } else {
+            alert("message was empty")
+        }
+    }
+
+    /* consumers.py, chat_message method sends following data as JSON data ...
+            await self.send(text_data=json.dumps({
+            'message': message,
+            'username': username,
+            'room': room
+        }))
+
+    */
+
+    chatSocket.onclose = function (e) {
+        console.log("socket closed")
+    }
+
+    // functions to handle specific events
+    document.getElementById("send-button").onclick = function (e) {
+        e.preventDefault() // stopping the page refresh on clicking the button
+        const messageInput = document.getElementById("message-input")
+        const message = messageInput.value
+
+        chatSocket.send(JSON.stringify({
+            'message': message,
+            'username': username,
+            'room': chatRoomName
+        }))
+        // converting it to a JSON object with stringify
+        messageInput.value = "" // clearing the field
+    }
+
+    function scroll() {
+        const mcontainer = document.getElementById('message-container')
+        mcontainer.scrollTop = mcontainer.scrollHeight
+    }
+    scroll()
+
+</script>
+{% endblock %}
