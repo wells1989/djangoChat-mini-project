@@ -10,6 +10,6 @@ def index(request):
 def chatroom(request, slug):
     chatroom = ChatRoom.objects.get(slug=slug)
 
-    messages = ChatMessage.objects.filter(room=chatroom)[0:30] # displaying first 30 messages
+    messages = ChatMessage.objects.filter(room=chatroom)[0:30]
 
     return render(request, 'chatapp/room.html', {'chatroom': chatroom, 'messages': messages})

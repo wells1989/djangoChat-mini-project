@@ -36,15 +36,14 @@
 
     const chatSocket = new WebSocket(
         'ws://'
-        + window.location.host // e.g. localhost:8000
+        + window.location.host
         + '/ws/'
         + chatRoomName
         + '/'
     )
-    // above, creating a new WebSocket using the above path e.g. ws://localhost:8000/ws/chatRoomName (as in routing.py is looking for path("ws/<str:room_name>" ...)
 
     chatSocket.onmessage = function (e) {
-        const data = JSON.parse(e.data) // parsing the send data
+        const data = JSON.parse(e.data)
 
         if (data.message) {
             const currentDate = new Date();
@@ -53,28 +52,18 @@
             let html = '<div class="message shadow-lg p-5 m-3 mr-10 ml-10 w-100 flex justify-center items-center bg-blue-100">' +
                 '<div class="p-3 italic">' + data.username + '</div>' + '<div class="p-3 font-bold">' + data.message + '</div>' + '<div class="p-3">' + formattedTime + '</div>' + '</div>'
             document.getElementById("chat-messages").innerHTML += html
-            setTimeout(scroll, 50); // setTimeout used to give DOM time to update before implementing scroll function
+            setTimeout(scroll, 50);
         } else {
             alert("message was empty")
         }
     }
 
-    /* consumers.py, chat_message method sends following data as JSON data ...
-            await self.send(text_data=json.dumps({
-            'message': message,
-            'username': username,
-            'room': room
-        }))
-
-    */
-
     chatSocket.onclose = function (e) {
         console.log("socket closed")
     }
 
-    // functions to handle specific events
     document.getElementById("send-button").onclick = function (e) {
-        e.preventDefault() // stopping the page refresh on clicking the button
+        e.preventDefault()
         const messageInput = document.getElementById("message-input")
         const message = messageInput.value
 
@@ -83,8 +72,7 @@
             'username': username,
             'room': chatRoomName
         }))
-        // converting it to a JSON object with stringify
-        messageInput.value = "" // clearing the field
+        messageInput.value = ""
     }
 
     function scroll() {

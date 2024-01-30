@@ -5,7 +5,6 @@ from django.contrib.auth.models import User
 class ChatRoom(models.Model):
     name = models.CharField(max_length=100)
     slug = models.SlugField(unique=True)
-    # slug create unique URLS for the chatrooms, as we'll use these to connect to sockets
 
 
 class ChatMessage(models.Model):
@@ -15,4 +14,4 @@ class ChatMessage(models.Model):
     date = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering=('date',) # ordering them by date
+        ordering=('date',)
